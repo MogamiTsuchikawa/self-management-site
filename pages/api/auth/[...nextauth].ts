@@ -23,7 +23,13 @@ export const authOption = {
       session: Session;
       user: User | AdapterUser;
     }) {
-      if (session?.user) session.user.id = user.id;
+      if (session?.user) {
+        session.user.id = user.id;
+        const userData = await prisma.user.findFirst({
+          where: { id: user.id },
+        });
+        session.user.role = userData!.role;
+      }
       return session;
     },
   },
