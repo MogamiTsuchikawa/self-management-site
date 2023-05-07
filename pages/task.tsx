@@ -94,7 +94,11 @@ const TaskPage = ({ requestTodos, notionTodos }: Props) => {
       </div>
       <div style={{ marginTop: 20 }}>
         <h2 style={h2Style}>タスクのリクエスト</h2>
-        <TaskRequestForm />
+        {session.user?.role! === 1 ? (
+          <p>リクエスト権限がありません</p>
+        ) : (
+          <TaskRequestForm />
+        )}
       </div>
     </div>
   );
