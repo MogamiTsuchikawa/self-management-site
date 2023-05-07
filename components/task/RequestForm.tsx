@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { myAxios } from "../../lib/axios";
+import { useRouter } from "next/router";
 
 const TaskRequestForm = () => {
+  const router = useRouter();
   const [titleText, setTitleText] = useState("");
   const [descriptionText, setDescriptionText] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
@@ -21,6 +23,7 @@ const TaskRequestForm = () => {
         alert("リクエストしました");
         setTitleText("");
         setDescriptionText("");
+        router.reload();
       })
       .catch((err) => {
         alert("リクエストに失敗しました");
