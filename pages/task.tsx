@@ -2,13 +2,13 @@ import { GetServerSideProps } from "next";
 import { useSession, getSession } from "next-auth/react";
 import prisma from "../lib/prismadb";
 import { RequestTodo } from "@prisma/client";
-import { notionClient } from "@/lib/notion";
 import { NotionTodo } from "@/interface/task";
 import Todo from "@/components/task/Todo";
-import { getCurrentTodoList } from "@/apis/notion";
+import { getCurrentTodoList, getTodoStatus } from "@/apis/notion";
+import TaskRequestForm from "@/components/task/RequestForm";
 
 type Props = {
-  requestTodos?: RequestTodo[];
+  requestTodos?: (RequestTodo & { status: string })[];
   notionTodos?: NotionTodo[];
 };
 
@@ -17,13 +17,19 @@ const statusList = [
   { name: "着手中", css: "badge-info" },
   { name: "保留", css: "badge-warning" },
 ];
+
+const h2Style = {
+  fontSize: 25,
+  marginBottom: 10,
+};
+
 const TaskPage = ({ requestTodos, notionTodos }: Props) => {
   const { data: session } = useSession();
   if (!session) return <p>ログインしていないです</p>;
   if (session.user?.role! === 0) return <p>権限不足です</p>;
   return (
-    <>
-      <h2>現状タスク</h2>
+    <div style={{ padding: 20 }}>
+      <h2 style={h2Style}>現状タスク</h2>
       <div style={{ overflow: "auto", height: 500, width: "100%" }}>
         {notionTodos ? (
           <ul style={{ display: "flex" }}>
@@ -46,28 +52,51 @@ const TaskPage = ({ requestTodos, notionTodos }: Props) => {
                 </ul>
               </li>
             ))}
-
-            <li></li>
-            <li></li>
           </ul>
         ) : (
           <p>閲覧権限がありません</p>
         )}
       </div>
-      <h2>リクエスト済みタスク一覧</h2>
-      <div>
-        {requestTodos ? (
-          <ul>
-            {requestTodos.map((todo) => (
-              <div>{todo.title}</div>
-            ))}
-          </ul>
-        ) : (
-          <p>権限がありません</p>
-        )}
+      <div style={{ marginTop: 20 }}>
+        <h2 style={h2Style}>リクエスト済みタスク一覧</h2>
+        <div>
+          {requestTodos ? (
+            requestTodos.length !== 0 ? (
+              <table>
+                <tbody>
+                  {requestTodos.map((todo) => (
+                    <tr>
+                      <td>
+                        <div
+                          className={
+                            "badge gap-2 " +
+                            statusList.find(
+                              (status) => status.name === todo.status
+                            )?.css
+                          }
+                          style={{ marginLeft: 10 }}
+                        >
+                          {todo.status}
+                        </div>
+                      </td>
+                      <td>{todo.title}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>リクエスト済みタスクはありません</p>
+            )
+          ) : (
+            <p>権限がありません</p>
+          )}
+        </div>
       </div>
-      <h2>タスクのリクエスト</h2>
-    </>
+      <div style={{ marginTop: 20 }}>
+        <h2 style={h2Style}>タスクのリクエスト</h2>
+        <TaskRequestForm />
+      </div>
+    </div>
   );
 };
 export default TaskPage;
@@ -75,9 +104,16 @@ export default TaskPage;
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getSession(context);
   if (!session) return { props: {} };
-  const requestTodos = await prisma?.requestTodo.findMany({
-    where: { authorId: session.user?.id },
-  });
+  const requestTodos: (RequestTodo & { status: string })[] = await Promise.all(
+    (
+      await prisma?.requestTodo.findMany({
+        where: { authorId: session.user?.id },
+      })
+    ).map(async (todo) => ({
+      ...todo,
+      status: await getTodoStatus(todo.notionId!),
+    }))
+  );
   let props: Props = {
     requestTodos: requestTodos,
   };

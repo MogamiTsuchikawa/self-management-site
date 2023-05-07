@@ -36,6 +36,7 @@ export const getCurrentTodoList = async (): Promise<NotionTodo[]> => {
             { property: "タグ", multi_select: { contains: "就活" } },
             { property: "タグ", multi_select: { contains: "真鍋研" } },
             { property: "タグ", multi_select: { contains: "仕事" } },
+            { property: "タグ", multi_select: { contains: "外部リクエスト" } },
           ],
         },
       ],
@@ -53,4 +54,13 @@ export const getCurrentTodoList = async (): Promise<NotionTodo[]> => {
     };
   });
   return notionTodos;
+};
+
+export const getTodoStatus = async (id: string): Promise<string> => {
+  try {
+    const todo: any = await notionClient.pages.retrieve({ page_id: id });
+    return todo.properties.Property.status.name;
+  } catch (e) {
+    return "削除済み";
+  }
 };
