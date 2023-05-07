@@ -58,7 +58,7 @@ const TaskRequestForm = () => {
         </div>
         <ul>
           {errors.map((e) => (
-            <li>{e}</li>
+            <li key={e}>{e}</li>
           ))}
         </ul>
 

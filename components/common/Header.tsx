@@ -70,9 +70,9 @@ const Navbar = () => {
         </label>
       </div>
       <div className="flex-1">
-        <a className="btn btn-ghost normal-case text-xl" href="/">
+        <Link className="btn btn-ghost normal-case text-xl" href="/">
           最上土川 Manager
-        </a>
+        </Link>
       </div>
       <div className="flex-none">
         {session ? (

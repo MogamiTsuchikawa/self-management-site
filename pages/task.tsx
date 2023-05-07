@@ -45,7 +45,7 @@ const TaskPage = ({ requestTodos, notionTodos }: Props) => {
                   {notionTodos
                     .filter((todo) => todo.status === status.name)
                     .map((todo) => (
-                      <li>
+                      <li key={todo.id}>
                         <Todo todo={todo} />
                       </li>
                     ))}
@@ -65,7 +65,7 @@ const TaskPage = ({ requestTodos, notionTodos }: Props) => {
               <table>
                 <tbody>
                   {requestTodos.map((todo) => (
-                    <tr>
+                    <tr key={todo.id}>
                       <td>
                         <div
                           className={

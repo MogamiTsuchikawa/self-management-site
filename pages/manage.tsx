@@ -47,7 +47,7 @@ const ManagePage = ({ users }: Props) => {
             {users ? (
               <>
                 {users.map((u) => (
-                  <tr>
+                  <tr key={u.id}>
                     <td>
                       <div className="avatar">
                         <div className="w-24 rounded-full">
