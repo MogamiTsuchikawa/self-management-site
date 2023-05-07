@@ -41,7 +41,7 @@ model User {
   email         String?       @unique
   emailVerified DateTime?
   image         String?
-  role          Int           @default(0)
+  role          Int           @default(0) // 0: デフォルト・権限無し 1: 読み取り専用 2: リクエスト権限あり 4: ユーザー管理権限あり
   accounts      Account[]
   sessions      Session[]
   todos         RequestTodo[]
